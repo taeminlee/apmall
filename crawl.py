@@ -155,6 +155,12 @@ def run_all():
         create_db()
         conn = sqlite3_conn()
         curs = conn.cursor()
+        curs.execute("delete from product")
+        conn.commit()
+        for product_list in product_gen():
+            print(product_list[0]['v_productnm'], len(product_list))
+            process_product_list(curs, product_list)
+            conn.commit()
         curs.execute("delete from review")
         conn.commit()
         curs.execute("select distinct(v_productcd) from product")
@@ -164,12 +170,6 @@ def run_all():
                 print(review_list[0]['v_content'], len(review_list))
                 process_review_list(curs, review_list)
                 conn.commit()
-        curs.execute("delete from product")
-        conn.commit()
-        for product_list in product_gen():
-            print(product_list[0]['v_productnm'], len(product_list))
-            process_product_list(curs, product_list)
-            conn.commit()
     except Exception as e:
         print(str(e))
     finally:
