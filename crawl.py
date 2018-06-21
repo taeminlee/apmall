@@ -176,7 +176,7 @@ def run_all():
         with open('product.cache', 'wb') as f:
             pickle.dump(product_cache, f)
         with open('review.cache', 'wb') as f:
-            pickle.dump(product_cache, f)
+            pickle.dump(review_cache, f)
 
 product_cache = {}
 review_cache = {}
