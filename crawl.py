@@ -145,12 +145,15 @@ def init_cache():
             product_cache = pickle.load(f)
         with open('review.cache', 'rb') as f:
             review_cache = pickle.load(f)
+        print("load cache")
     except:
         product_cache = {}
         review_cache = {}
+        print("init cache")
    
 def run_all():
     global product_cache, review_cache
+    init_cache()
     try:
         create_db()
         conn = sqlite3_conn()
@@ -165,7 +168,10 @@ def run_all():
         conn.commit()
         curs.execute("select distinct(v_productcd) from product")
         productIds = list(map(lambda row: row[0], curs.fetchall()))
+        pageNum = 0
         for productId in productIds:
+            print(pageNum, len(productIds))
+            pageNum = pageNum + 1
             for review_list in review_gen(productId):
                 print(review_list[0]['v_content'], len(review_list))
                 process_review_list(curs, review_list)
