@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #%% impot libraries
 import sqlite3
 import requests
@@ -39,6 +40,7 @@ def create_db():
     conn.commit()
 
 def product_gen(category=None,brand=None):
+    global product_cache
     url = "http://www.amorepacificmall.com/mobile/shop/mobile_shop_category_product_list_ajax.do"
     max_page = 1000
     page = 1
@@ -64,6 +66,7 @@ def product_gen(category=None,brand=None):
             yield result['object']['shopprd']['list']
 
 def review_gen(productId):
+    global review_cache
     url = "http://www.amorepacificmall.com/mobile/shop/mobile_shop_product_review_ajax.do"
     max_page = 1000
     page = 1
@@ -147,6 +150,7 @@ def init_cache():
         review_cache = {}
    
 def run_all():
+    global product_cache, review_cache
     try:
         create_db()
         conn = sqlite3_conn()
@@ -173,6 +177,9 @@ def run_all():
             pickle.dump(product_cache, f)
         with open('review.cache', 'wb') as f:
             pickle.dump(product_cache, f)
+
+product_cache = {}
+review_cache = {}
 
 if __name__ == '__main__':
     try:
