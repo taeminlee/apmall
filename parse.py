@@ -18,6 +18,9 @@ def kkma_test(test_str = None):
 
 print(kkma_test())
 
+def pos_list(content):
+    return kkma.pos(content, flatten=True)
+
 #%% functions
 def sqlite3_conn():
     return sqlite3.connect('data.db')
@@ -25,30 +28,50 @@ def sqlite3_conn():
 def create_db():
     conn = sqlite3_conn()
     curs = conn.cursor()
-    review_sql = """CREATE TABLE IF NOT EXISTS review (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        v_productcd varchar(255),
-        v_optionnm varchar(255),
-        n_recom_point INT,
-        v_content TEXT,
-        n_content_len INT,
-        v_levelnm varchar(255),
-        v_reg_dtm LONG,
-        json TEXT
+    pos_raw_sql = """CREATE TABLE IF NOT EXISTS pos_raw (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        rid int,
+        seq int,
+        str varchar(255),
+        pos varchar(255)
         );"""
-    curs.execute(review_sql)
-    product_sql = """CREATE TABLE IF NOT EXISTS product (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        v_productcd varchar(255),
-        v_productnm varchar(255),
-        v_categorycd varchar(255),
-        v_brandcd varchar(255),
-        v_brandnm varchar(255),
-        n_list_price INT,
-        n_price INT,
-        v_prod_ctg_path varchar(255),
-        v_reg_dtm LONG,
-        json TEXT
-        );"""
-    curs.execute(product_sql)
+    curs.execute(pos_raw_sql)
     conn.commit()
+
+def review_pos_raw_gen(curs):
+    sql = "select * from review"
+    for row in curs.execute(sql):
+        rid = row['id']
+        seq = 0
+        for pos in pos_list(row['v_content']):
+            args = (rid, seq, pos[0], pos[1])
+            yield args
+            seq = seq+1
+
+def insert_pos_raw(curs, args):
+    sql = "insert into pos_raw values(null, %s)" % (", ".join(["?"] * len(args)))
+    curs.execute(sql, args)
+
+def run_pos_raw():
+    create_db()
+    conn = sqlite3_conn()
+    select_curs = conn.cursor()
+    insert_curs = conn.cursor()
+    cnt = 0
+    for pos_raw_args in review_pos_raw_gen(select_curs):
+        cnt = cnt+1
+        if cnt % 100 == 0:
+            print(cnt/100)
+            conn.commit()
+        insert_pos_raw(insert_curs, pos_raw_args)
+    conn.commit()
+
+if __name__ == '__main__':
+    try:
+        run_pos_raw()
+    except KeyboardInterrupt:
+        print("Exit")
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
