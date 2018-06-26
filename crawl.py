@@ -145,11 +145,15 @@ def init_cache():
     try:
         with open('product.cache', 'rb') as f:
             product_cache = pickle.load(f)
+        print("load cache")
+    except:
+        product_cache = {}
+        print("init cache")
+    try:
         with open('review.cache', 'rb') as f:
             review_cache = pickle.load(f)
         print("load cache")
     except:
-        product_cache = {}
         review_cache = {}
         print("init cache")
    
