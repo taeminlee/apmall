@@ -38,6 +38,11 @@ def create_db():
     curs.execute(pos_raw_sql)
     conn.commit()
 
+def truncate_table(curs, table_name):
+    sql = "truncate %s" % table_name
+    curs.execute(sql)
+    
+
 def review_pos_raw_gen(curs):
     sql = "select * from review"
     for row in curs.execute(sql):
@@ -56,6 +61,7 @@ def insert_pos_raw(curs, args):
 
 def run_pos_raw():
     create_db()
+    truncate_table("pos_raw")
     conn = sqlite3_conn()
     select_curs = conn.cursor()
     insert_curs = conn.cursor()
