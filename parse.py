@@ -61,10 +61,10 @@ def insert_pos_raw(curs, args):
 
 def run_pos_raw():
     create_db()
-    truncate_table("pos_raw")
     conn = sqlite3_conn()
     select_curs = conn.cursor()
     insert_curs = conn.cursor()
+    truncate_table(select_curs, "pos_raw")
     cnt = 0
     for pos_raw_args in review_pos_raw_gen(select_curs):
         cnt = cnt+1
