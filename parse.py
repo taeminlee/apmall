@@ -39,7 +39,7 @@ def create_db():
     conn.commit()
 
 def truncate_table(curs, table_name):
-    sql = "truncate %s" % table_name
+    sql = "delete from %s" % table_name
     curs.execute(sql)
     
 
