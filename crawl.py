@@ -111,7 +111,7 @@ def process_product_list(curs, product_list):
                 args.append('')
             args.append(int(item['v_reg_dtm']))
             args.append(json.dumps(item, ensure_ascii=False))
-            sql = "insert into product values (%s)" % (", ".join(["?"] * len(args)))
+            sql = "insert into product values (null, %s)" % (", ".join(["?"] * len(args)))
             #print(sql)
             curs.execute(sql, args)
         except Exception as e:
@@ -133,7 +133,7 @@ def process_review_list(curs, review_list):
             args.append(item['v_levelnm'])
             args.append(int(item['v_reg_dtm']))
             args.append(json.dumps(item, ensure_ascii=False))
-            sql = "insert into review values (%s)" % (", ".join(["?"] * len(args)))
+            sql = "insert into review values (null, %s)" % (", ".join(["?"] * len(args)))
             #print(sql)
             curs.execute(sql, args)
         except Exception as e:
