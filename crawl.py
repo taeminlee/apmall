@@ -14,7 +14,7 @@ def create_db():
     conn = sqlite3_conn()
     curs = conn.cursor()
     review_sql = """CREATE TABLE IF NOT EXISTS review (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         v_productcd varchar(255),
         v_optionnm varchar(255),
         n_recom_point INT,
@@ -26,7 +26,7 @@ def create_db():
         );"""
     curs.execute(review_sql)
     product_sql = """CREATE TABLE IF NOT EXISTS product (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         v_productcd varchar(255),
         v_productnm varchar(255),
         v_categorycd varchar(255),
