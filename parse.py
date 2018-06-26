@@ -41,9 +41,11 @@ def create_db():
 def review_pos_raw_gen(curs):
     sql = "select * from review"
     for row in curs.execute(sql):
-        rid = row['id']
+        rid = row[0]
         seq = 0
-        for pos in pos_list(row['v_content']):
+        poss = pos_list(row[4])
+        print(poss)
+        for pos in poss:
             args = (rid, seq, pos[0], pos[1])
             yield args
             seq = seq+1
