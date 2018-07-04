@@ -179,7 +179,7 @@ def run_all():
             print(pageNum, len(productIds))
             pageNum = pageNum + 1
             for review_list in review_gen(productId):
-                print(review_list[0]['v_content'], len(review_list))
+                print(review_list[0]['v_brandnm'], review_list[0]['v_content'], len(review_list))
                 process_review_list(curs, review_list)
                 conn.commit()
     except Exception as e:

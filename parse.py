@@ -6,20 +6,19 @@ import pickle
 import json
 import sys
 import os
-from konlpy.tag import Kkma
+from konlpy.tag import Kkma, Twitter
+#from twkorean import TwitterKoreanProcessor
 
-#%% kkma test
 kkma = Kkma()
-def kkma_test(test_str = None):
-    if test_str is None:
-        test_str = "users_s 표절검사 대상 사용자 집합을 정의한다. withcs 시스템의 경우 공개형 강의 플랫폼으로 외부인 역시 참여 가능하다. 과제의 평가 관점에서 수강생에 대해서만 상호 표절 검사를 진행해야 한다."
-    #print(test_str)
-    return kkma.pos(test_str, flatten=True)
+twitter = Twitter()
+#processor = TwitterKoreanProcessor(stemming=False)
 
-print(kkma_test())
+buffer = []
 
 def pos_list(content):
-    return kkma.pos(content, flatten=True)
+    #return kkma.morphs(content, flatten=False)
+    return twitter.morphs(content)
+    #return processor.tokenize(content)
 
 #%% functions
 def sqlite3_conn():
@@ -46,14 +45,26 @@ def truncate_table(curs, table_name):
 def review_pos_raw_gen(curs):
     sql = "select * from review"
     for row in curs.execute(sql):
-        rid = row[0]
         seq = 0
-        poss = pos_list(row[4])
-        print(poss)
-        for pos in poss:
-            args = (rid, seq, pos[0], pos[1])
-            yield args
-            seq = seq+1
+        rid = row[0]
+        if len(row[4]) < 120:
+            continue
+        if row[4] in buffer:
+            continue
+        buffer.append(row[4])
+        try:
+            #print('before pos_list')
+            poss = pos_list(row[4])
+            print(poss)
+            #print('after pos_list')
+            print(rid)
+            for pos in poss:
+                #print(pos)
+                args = (rid, seq, pos, None)
+                yield args
+                seq = seq+1
+        except Exception:
+            print(row)
 
 def insert_pos_raw(curs, args):
     sql = "insert into pos_raw values(null, %s)" % (", ".join(["?"] * len(args)))
@@ -69,9 +80,10 @@ def run_pos_raw():
     for pos_raw_args in review_pos_raw_gen(select_curs):
         cnt = cnt+1
         if cnt % 100 == 0:
-            print(cnt/100)
+            #print(cnt)
             conn.commit()
         insert_pos_raw(insert_curs, pos_raw_args)
+    #print(cnt)
     conn.commit()
 
 if __name__ == '__main__':
