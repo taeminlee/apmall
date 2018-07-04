@@ -172,14 +172,16 @@ def run_all():
             conn.commit()
         curs.execute("delete from review")
         conn.commit()
-        curs.execute("select distinct(v_productcd) from product")
-        productIds = list(map(lambda row: row[0], curs.fetchall()))
+        curs.execute("select distinct(v_productcd), v_brandnm from product")
+        products = list(map(lambda row: row, curs.fetchall()))
         pageNum = 0
-        for productId in productIds:
-            print(pageNum, len(productIds))
+        for product in products:
+            prouctId = product[0]
+            bandnm = product[1]
+            print(pageNum, len(products))
             pageNum = pageNum + 1
             for review_list in review_gen(productId):
-                print(review_list[0]['v_brandnm'], review_list[0]['v_content'], len(review_list))
+                print(bandnm, review_list[0]['v_content'], len(review_list))
                 process_review_list(curs, review_list)
                 conn.commit()
     except Exception as e:
