@@ -176,12 +176,13 @@ def run_all():
         products = list(map(lambda row: row, curs.fetchall()))
         pageNum = 0
         for product in products:
-            prouctId = product[0]
-            bandnm = product[1]
+            print(product)
+            productId = product[0]
+            brandnm = product[1]
             print(pageNum, len(products))
             pageNum = pageNum + 1
             for review_list in review_gen(productId):
-                print(bandnm, review_list[0]['v_content'], len(review_list))
+                print(brandnm, review_list[0]['v_content'], len(review_list))
                 process_review_list(curs, review_list)
                 conn.commit()
     except Exception as e:
