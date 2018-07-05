@@ -123,6 +123,8 @@ def process_review_list(curs, review_list):
         try:
             args = []
             args.append(item['v_productcd'])
+            if "v_content" not in item:
+                continue
             if "v_optionnm" in item:
                 args.append(item['v_optionnm'])
             else:
