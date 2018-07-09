@@ -95,6 +95,7 @@ def review_gen(productId):
                     max_page = int(result['object']['textReview']['page']['i_iTotalPageCnt'])
 
                     yield result['object']['textReview']['list']
+                    cnt = 100
                 except:
                     pass
 
