@@ -72,6 +72,8 @@ def review_gen(productId):
     url = "http://www.amorepacificmall.com/mobile/shop/mobile_shop_product_review_ajax.do"
     max_page = 1000
     page = 1
+    max_retry = 10
+    cnt = 0
     while page <= max_page:
         data = {
             'i_iNowPageNo' : page,
@@ -84,12 +86,17 @@ def review_gen(productId):
             max_page = int(review_cache[datastr]['object']['textReview']['page']['i_iTotalPageCnt'])
             yield review_cache[datastr]['object']['textReview']['list']
         else:
-            res = requests.post(url = url, data = data)
-            result = res.json()
-            review_cache[datastr] = result
-            max_page = int(result['object']['textReview']['page']['i_iTotalPageCnt'])
+            while cnt < max_retry:
+                try:
+                    cnt = cnt + 1
+                    res = requests.post(url = url, data = data)
+                    result = res.json()
+                    review_cache[datastr] = result
+                    max_page = int(result['object']['textReview']['page']['i_iTotalPageCnt'])
 
-            yield result['object']['textReview']['list']
+                    yield result['object']['textReview']['list']
+                except:
+                    pass
 
 def process_product_list(curs, product_list):
     for item in product_list:
@@ -115,7 +122,7 @@ def process_product_list(curs, product_list):
             #print(sql)
             curs.execute(sql, args)
         except Exception as e:
-            print(str(e))
+            print(e.message, e.args)
             print(item)
 
 def process_review_list(curs, review_list):
@@ -132,14 +139,17 @@ def process_review_list(curs, review_list):
             args.append(int(item['n_recom_point']))
             args.append(item['v_content'])
             args.append(len(item['v_content']))
-            args.append(item['v_levelnm'])
+            if "v_levelnm" in item:
+                args.append(item['v_levelnm'])
+            else:
+                args.append("")
             args.append(int(item['v_reg_dtm']))
             args.append(json.dumps(item, ensure_ascii=False))
             sql = "insert into review values (null, %s)" % (", ".join(["?"] * len(args)))
             #print(sql)
             curs.execute(sql, args)
         except Exception as e:
-            print(str(e))
+            print(e.message, e.args)
             print(item)
 
 def init_cache():
@@ -184,11 +194,12 @@ def run_all():
             print(pageNum, len(products))
             pageNum = pageNum + 1
             for review_list in review_gen(productId):
-                print(brandnm, review_list[0]['v_content'], len(review_list))
+                if 'v_content' in review_list[0]:
+                    print(brandnm, review_list[0]['v_content'], len(review_list))
                 process_review_list(curs, review_list)
                 conn.commit()
     except Exception as e:
-        print(str(e))
+        print(e.message, e.args)
     finally:
         with open('product.cache', 'wb') as f:
             pickle.dump(product_cache, f)
