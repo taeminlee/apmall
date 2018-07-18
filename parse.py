@@ -25,7 +25,7 @@ def pos_list(content):
     for token in dic:
         if token in content:
             if token not in morphs:
-                print(token)
+ #               print(token)
                 buffer = ""
                 start_idx = -1
                 end_idx = -1
@@ -47,10 +47,10 @@ def pos_list(content):
                 if len(merge_candidates) > 0:
                     for merge_idx in merge_candidates:
                         morphs = morphs[0:merge_idx[0]] + [token] + morphs[merge_idx[1]+1:]
-                        if(merge_idx[1]-merge_idx[0] > 1):
-                            print(morphs)
-                            print(merge_candidates)
-                            input()
+#                        if(merge_idx[1]-merge_idx[0] > 1):
+#                            print(morphs)
+#                            print(merge_candidates)
+#                            input()
     return morphs
 
     #return processor.tokenize(content)    
