@@ -6,40 +6,7 @@ import pickle
 import json
 import sys
 import os
-
-def sqlite3_conn():
-    return sqlite3.connect('data.db')
-
-def create_db():
-    conn = sqlite3_conn()
-    curs = conn.cursor()
-    review_sql = """CREATE TABLE IF NOT EXISTS review (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        v_productcd varchar(255),
-        v_optionnm varchar(255),
-        n_recom_point INT,
-        v_content TEXT,
-        n_content_len INT,
-        v_levelnm varchar(255),
-        v_reg_dtm LONG,
-        json TEXT
-        );"""
-    curs.execute(review_sql)
-    product_sql = """CREATE TABLE IF NOT EXISTS product (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        v_productcd varchar(255),
-        v_productnm varchar(255),
-        v_categorycd varchar(255),
-        v_brandcd varchar(255),
-        v_brandnm varchar(255),
-        n_list_price INT,
-        n_price INT,
-        v_prod_ctg_path varchar(255),
-        v_reg_dtm LONG,
-        json TEXT
-        );"""
-    curs.execute(product_sql)
-    conn.commit()
+import util
 
 def product_gen(category=None,brand=None):
     global product_cache
@@ -174,8 +141,31 @@ def run_all():
     global product_cache, review_cache
     init_cache()
     try:
-        create_db()
-        conn = sqlite3_conn()
+        util.create_db("""CREATE TABLE IF NOT EXISTS review (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        v_productcd varchar(255),
+        v_optionnm varchar(255),
+        n_recom_point INT,
+        v_content TEXT,
+        n_content_len INT,
+        v_levelnm varchar(255),
+        v_reg_dtm LONG,
+        json TEXT
+        );""")
+        util.create_db("""CREATE TABLE IF NOT EXISTS product (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        v_productcd varchar(255),
+        v_productnm varchar(255),
+        v_categorycd varchar(255),
+        v_brandcd varchar(255),
+        v_brandnm varchar(255),
+        n_list_price INT,
+        n_price INT,
+        v_prod_ctg_path varchar(255),
+        v_reg_dtm LONG,
+        json TEXT
+        );""")
+        conn = util.sqlite3_conn()
         curs = conn.cursor()
         curs.execute("delete from product")
         conn.commit()

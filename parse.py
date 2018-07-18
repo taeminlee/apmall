@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 #%% impot libraries
-import sqlite3
 import requests
 import pickle
 import json
 import sys
 import os
 from konlpy.tag import Kkma, Twitter
+import util
+from functools import reduce
 #from twkorean import TwitterKoreanProcessor
 
 kkma = Kkma()
@@ -15,32 +16,44 @@ twitter = Twitter()
 
 buffer = []
 
+dic = util.load_dic()
+
 def pos_list(content):
     #return kkma.morphs(content, flatten=False)
-    return twitter.morphs(content)
-    #return processor.tokenize(content)
+    morphs = twitter.morphs(content)
+    # 사전의 단어가 존재하면 분절화된 경우 다시 합침
+    for token in dic:
+        if token in content:
+            if token not in morphs:
+                print(token)
+                buffer = ""
+                start_idx = -1
+                end_idx = -1
+                bias = 0
+                merge_candidates = []
+                for idx, morph in enumerate(morphs):
+                    if token.startswith(morph):
+                        buffer = morph
+                        start_idx = idx
+                    elif token.startswith(buffer + morph):
+                        buffer = buffer + morph
+                    else:
+                        buffer = ""
+                    if buffer == token:
+                        end_idx = idx
+                        buffer = ""
+                        merge_candidates.append((start_idx - bias, end_idx - bias))
+                        bias = bias + end_idx - start_idx
+                if len(merge_candidates) > 0:
+                    for merge_idx in merge_candidates:
+                        morphs = morphs[0:merge_idx[0]] + [token] + morphs[merge_idx[1]+1:]
+                        if(merge_idx[1]-merge_idx[0] > 1):
+                            print(morphs)
+                            print(merge_candidates)
+                            input()
+    return morphs
 
-#%% functions
-def sqlite3_conn():
-    return sqlite3.connect('data.db')
-
-def create_db():
-    conn = sqlite3_conn()
-    curs = conn.cursor()
-    pos_raw_sql = """CREATE TABLE IF NOT EXISTS pos_raw (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        rid int,
-        seq int,
-        str varchar(255),
-        pos varchar(255)
-        );"""
-    curs.execute(pos_raw_sql)
-    conn.commit()
-
-def truncate_table(curs, table_name):
-    sql = "delete from %s" % table_name
-    curs.execute(sql)
-    
+    #return processor.tokenize(content)    
 
 def review_pos_raw_gen(curs):
     sql = "select * from review"
@@ -55,7 +68,7 @@ def review_pos_raw_gen(curs):
         try:
             #print('before pos_list')
             poss = pos_list(row[4])
-            print(poss)
+            #print(poss)
             #print('after pos_list')
             print(rid)
             for pos in poss:
@@ -71,11 +84,17 @@ def insert_pos_raw(curs, args):
     curs.execute(sql, args)
 
 def run_pos_raw():
-    create_db()
-    conn = sqlite3_conn()
+    util.create_db("""CREATE TABLE IF NOT EXISTS pos_raw (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        rid int,
+        seq int,
+        str varchar(255),
+        pos varchar(255)
+        );""")
+    conn = util.sqlite3_conn()
     select_curs = conn.cursor()
     insert_curs = conn.cursor()
-    truncate_table(select_curs, "pos_raw")
+    util.truncate_table(select_curs, "pos_raw")
     cnt = 0
     for pos_raw_args in review_pos_raw_gen(select_curs):
         cnt = cnt+1

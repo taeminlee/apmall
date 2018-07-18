@@ -1,8 +1,9 @@
 #%%
-import sqlite3
+import util
+import sys
 
-def main():
-    conn = sqlite3.connect('data.db')
+def create_corpus():
+    conn = util.sqlite3_conn()
     curs = conn.cursor()
     with open('input.txt', 'w', encoding='utf-8') as f:
         for rrow in conn.cursor().execute("""select review.id, v_categorycd from review join product on (review.v_productcd = product.v_productcd) 
@@ -13,4 +14,6 @@ def main():
                 continue
             line = "%s %s\n" % (rrow[0], " ".join(strs))
             f.write(line)
-main()
+
+if __name__ == '__main__':
+    sys.exit(create_corpus())
