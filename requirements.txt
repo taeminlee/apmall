@@ -1,2 +1,8 @@
+<<<<<<< HEAD
 requests
 konlpy
+=======
+requests
+konlpy
+jpype1
+>>>>>>> 8521f8c215b36d5d6f590d8367cd8ff1cbb5f0d0

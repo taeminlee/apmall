@@ -1,6 +1,6 @@
 #%%
-import sqlite3
-import argparse
+import util
+import sys
 
 parser = argparse.ArgumentParser(description='Training corpus generator')
 parser.add_argument('--mode', default='word-rnn', help='data target : word-rnn or GloVe')
@@ -12,7 +12,7 @@ if(args.mode == 'word-rnn'):
     input_name = 'input.txt'
 
 def main():
-    conn = sqlite3.connect('data.db')
+    conn = util.sqlite3_conn()
     curs = conn.cursor()
     curs2 = conn.cursor()
     with open(input_name, 'w', encoding='utf-8') as f:
@@ -28,4 +28,6 @@ def main():
                 line = "%s\n" % (" ".join(strs))
             print(rrow[0])
             f.write(line)
-main()
+
+if __name__ == '__main__':
+    sys.exit(create_corpus())
