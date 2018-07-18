@@ -55,7 +55,7 @@ def review_pos_raw_gen(curs):
         try:
             #print('before pos_list')
             poss = pos_list(row[4])
-            print(poss)
+            #print(poss)
             #print('after pos_list')
             print(rid)
             for pos in poss:
